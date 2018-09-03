@@ -1,3 +1,4 @@
+
 import codecs
 fileObj = codecs.open( "live.htm", "r", "utf_8" )
 text = fileObj.read() # или читайте по строке
@@ -40,11 +41,31 @@ for lTable in tree.xpath('.//span[@class=\"googleStatIssue\"]'):
         #print(lBet[0].text)
         print(lKoefs)
 
+
+
+import requests
+payload = {'page': 'line', 'action': '2','live[]': ['42796377'], 'sid[]': ['1']}
+r = requests.get('https://olimp.kz/index.php?page=line&action=2&live[]=42796377&sid[]=1')
+r1 = requests.get('https://olimp.kz/index.php',payload)
+print(r1.url)
+tree=fromstring(r.text)
+print(r)
+for lTable in tree.xpath('.//span[@class=\"googleStatIssue\"]'):
+    for lKoefs in lTable.xpath('.//span/text()'):
+        #lBet=lTable.xpath('.//span[@class=\"googleStatIssueName\"]')
+        #print(lBet[0].text)
+        print(lKoefs)
+
+'''
 import socket
 
 timeout = 30
 socket.setdefaulttimeout(timeout)
 
+import sys
 from urllib.request import Request, urlopen
-req=Request('https://olimp.kz/index.php?page=line&action=2&live[]=42803100&sid[]=1', headers={'User-Agent': 'Mozilla/5.0'})
+url="https://olimp.kz/betting"
+req = Request(url, headers={'User-Agent':'Mozilla/5.0'})
 web_byte = urlopen(req).read()
+webpage = web_byte.decode('utf-8')
+'''
