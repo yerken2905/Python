@@ -11,6 +11,7 @@ timeout = 100
 socket.setdefaulttimeout(timeout)
 
 aHref=[]
+#data=datetime.today().strftime("%d.%m.%Y")
 
 def connect_oracle():
     try:
@@ -46,11 +47,14 @@ def mod_table_ol(idRow, nameCol,  value):
     #print(text)
     if ocursor.fetchone():
         text="update z_025_temp_ol set " + nameCol + "=:s where id=" + str(idRow)
-    else:
+    elif nameCol='s1':
         text="insert into z_025_temp_ol (id,"+nameCol+") values("+ str(idRow) + ",:s)"
-    text="begin execute immediate '"+text+ "' using '"+value+"'; end;"
-    ocursor.execute(text)
-    my_connection.commit()
+    else
+        text=None
+    if text is not None:
+        text="begin execute immediate '"+text+ "' using '"+value+"'; end;"
+        ocursor.execute(text)
+        my_connection.commit()
 
 def first_page():
     url='https://olimp.kz/index.php?page=table_live'
@@ -97,17 +101,19 @@ def result_page():
     tree = fromstring(web_byte)
     # Результаты
     for lTable in tree.xpath('.//table[@class=\"koeftable\"]'):
-        cId=lTable.xpath('.//div[@id]')
-        ch=cId[len(cId)-1].get('id')[1:]
-        cText=''
-        for lKoefs in lTable.xpath('.//text()'):
-            cRow=lKoefs.replace('\n','').replace('\xa0','').replace('-','')
-            if len(cRow)>1:
-                cText+=cRow+';'
-        #print(cText)
-        #data=datetime.today().strftime("%d.%m.%Y")
-        mod_table_ol(ch, 's3', cText)
-        #mod_table_result(data, cText)
+        for lTr in lTable.xpath('.//tr'):
+            cId=lTr.xpath('.//td/div[@id]')
+            try:
+                ch=cId[len(cId)-1].get('id')[1:]
+                print(ch)
+                cText=''
+                for lKoefs in lTr.xpath('.//text()'):
+                    cRow=lKoefs.replace('\n','').replace('\xa0','').replace('-','')
+                    if len(cRow)>1:
+                        cText+=cRow+';'
+                mod_table_ol(ch, 's3', cText)
+            except:
+                pass
 
 connect_oracle()
 time.sleep(100)
