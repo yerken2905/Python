@@ -37,42 +37,26 @@ def connectDB():
         print('Logon  Error:', info)
 
 
-def mod_table_result(idRow, nameCol, value):
-    text = 'select * from z_025_temp_ol where id=' + str(idRow)
-    cursorDB.execute(text)
-    # print(text)
-    if cursorDB.fetchone():
-        text = "update z_025_temp_ol set " + nameCol + "=:s where id=" + str(idRow)
-        text = "begin execute immediate '" + text + "' using '" + value + "'; end;"
-        cursorDB.execute(text)
-        connectionDB.commit()
-    '''
-    while len(value) > 0:
-        text="insert into z_025_temp_result (sresult) values (:s)"
-        text="begin execute immediate '"+text+ "' using '"+value[0:bSize]+"'; end;"
-        value=value[bSize:]
-        ocursor.execute(text)
-    connectionDB.commit()
-    '''
-
-
 def mod_table_ol(idRow, nameCol, value):
-    text = 'select * from z_025_temp_ol where id=' + str(idRow)
+    text = 'select s2 from z_025_temp_ol where id=' + str(idRow)
     cursorDB.execute(text)
-    if cursorDB.fetchone():
-        if (nameCol=='s2' and cursorDB.fetchall()[0][2] is None) or (nameCol=='s3'):
+    text=None
+    if nameCol=='s1':
+        if not cursorDB.fetchone():
+            text = "insert into z_025_temp_ol (id," + nameCol + ") values(" + str(idRow) + ",:s)"
+    elif nameCol=='s2':
+        if cursorDB.fetchone()[0] is None:
             text = "update z_025_temp_ol set " + nameCol + "=:s where id=" + str(idRow)
-    elif nameCol == 's1':
-        text = "insert into z_025_temp_ol (id," + nameCol + ") values(" + str(idRow) + ",:s)"
-    else:
-        text = None
+    elif nameCol=='s3':
+        if cursorDB.fetchone():
+            text = "update z_025_temp_ol set " + nameCol + "=:s where id=" + str(idRow)
     if text is not None:
         text = "begin execute immediate '" + text + "' using '" + value + "'; end;"
         try:
             cursorDB.execute(text)
             connectionDB.commit()
         except:
-            print('idRow:' + idRow, 'text:' + text, 'nameCol:' + nameCol, 'value:' + value)
+            print(text)
 
 
 def livePage():
