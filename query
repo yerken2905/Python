@@ -1,0 +1,80 @@
+
+  function fToken2(cStr        in varchar2,
+                   iNum        in integer,
+                   cDelimiters in varchar2 default '.,') return varchar2 as
+    type tDelimitersPos is table of pls_integer index by binary_integer;
+    dp   tDelimitersPos; -- список позиций разделителей
+    iLen pls_integer := length(cStr);
+    i    pls_integer := 1;
+  begin
+    dp(1) := 0;
+    while i <= iLen loop
+      if instr(cDelimiters, substr(cStr, i, 1)) > 0 then
+        dp(dp.count + 1) := i;
+        exit when dp.count > iNum; -- нашли обе границы "слова"
+      end if;
+      i := i + 1;
+    end loop;
+    if iNum < dp.count then
+      i := dp(iNum);
+      return substr(cStr, i + 1, dp(iNum + 1) - i - 1);
+    elsif iNum = dp.count then
+      return substr(cStr, dp(iNum) + 1);
+    else
+      return null;
+    end if;
+  end;
+
+  function fToken(cStr        in varchar2,
+                  iNum        in integer,
+                  cDelimiters in varchar2 default '.,') return varchar2 as
+    cTmp     varchar2(2000); -- буфер обработки
+    iCounter pls_integer := 1; -- счетчик слов
+    iPos     pls_integer := 1; -- позиция начала слова
+    iSpace   pls_integer; -- позиция пробела
+    iLen     pls_integer; -- длина строки
+  begin
+    cTmp := ltrim(translate(cStr, cDelimiters, '  '));
+    iLen := length(cTmp);
+    loop
+      if iCounter > iNum then
+        -- проскочили искомый номер
+        return(null);
+      elsif iCounter = iNum then
+        -- слово ищем с первой позиции
+        iSpace := instr(cTmp, ' ', iPos);
+        if iSpace > 0 then
+          -- слово выделено
+          return(substr(cTmp, iPos, iSpace - iPos));
+        else
+          -- все что осталось и есть наше слово
+          return(substr(cTmp, iPos));
+        end if;
+      else
+        -- пока не дошли до нужного слова
+        iSpace := instr(cTmp, ' ', iPos);
+        if iSpace > 0 and iSpace < iLen then
+          -- слово выделено
+          iPos := iSpace + 1;
+          while iPos <= iLen loop
+            -- перебираем подряд пробелы до конца строки
+            if substr(cTmp, iPos, 1) = ' ' then
+              iPos := iPos + 1;
+            else
+              -- позиция первого символа следующего слова найдена
+              exit;
+            end if;
+          end loop;
+          if iPos > iLen then
+            -- таки и не дошли
+            return(null);
+          end if;
+        else
+          -- только данное слово и осталось, но нам его не надо
+          return(null);
+        end if;
+      end if;
+      iCounter := iCounter + 1;
+    end loop;
+  end;
+
