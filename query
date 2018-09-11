@@ -1,3 +1,40 @@
+truncate table z_025_temp_ol
+select * from z_025_temp_ol where id=42871763
+
+delete from Z_025_TEMP_ol where s2 is null
+create table Z_025_TEMP_RESULT
+
+select utl_raw.cast_to_varchar2(s1) from Z_025_TEMP_ol
+
+select sum(pb1)-sum(pb2) 
+--pb1,pb2
+from(
+select p1,pb1,p2,pb2,
+trim(C_PkgString.fToken2(s3,4,':()')) c1,
+trim(C_PkgString.fToken2(s3,5,':()')) c2,
+s2,s3
+from
+(select 
+C_PkgString.fToken2(substr(s2,1,2000),1,';') p1,
+C_PkgString.fToken2(substr(s2,1,2000),2,';') pb1,
+C_PkgString.fToken2(substr(s2,1,2000),3,';') p2,
+C_PkgString.fToken2(substr(s2,1,2000),4,';') pb2,
+C_PkgString.fToken2(s3,3,';') r1,
+s2,
+s3
+from
+(select dbms_lob.substr(s1) s1,dbms_lob.substr(s2) s2,dbms_lob.substr(s3) s3 from Z_025_TEMP_ol)
+)
+where p1='П1' and p2='П2' and substr(pb1,1,1)<>'Ф' and substr(pb2,1,1)<>'Ф'
+)
+where
+--(pb1<pb2 and c1>c2) or (pb1>pb2 and c1<c2)
+(pb1<pb2 and c1<c2) or (pb1>pb2 and c1>c2)
+
+
+call openconnection(user)
+select to_number('12.25') from dual
+
 
   function fToken2(cStr        in varchar2,
                    iNum        in integer,
