@@ -17,7 +17,7 @@ bSize = 4000
 dataToday=datetime.today().strftime("%d.%m.%Y")
 
 def deleteSymbolUnless(sPar):
-    return sPar.replace('\n', '').replace('\xa0', '').replace('-', '').lstrip()
+    return sPar.replace('\n', '').replace('\xa0', '').replace('-', '').strip()
 
 def connectURL(url):
     print(url)
@@ -127,8 +127,8 @@ def livePage():
 
 connectDB()
 time.sleep(100)
-#livePage()
+livePage()
 #liveTablePage()
 # print(time.ctime())
-#betPage()
+betPage()
 resultPage()
