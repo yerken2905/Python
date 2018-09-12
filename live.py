@@ -14,7 +14,7 @@ aHref = []
 bSize = 4000
 
 
-# data=datetime.today().strftime("%d.%m.%Y")
+dataToday=datetime.today().strftime("%d.%m.%Y")
 
 def deleteSymbolUnless(sPar):
     return sPar.replace('\n', '').replace('\xa0', '').replace('-', '').lstrip()
@@ -30,20 +30,20 @@ def connectDB():
     try:
         global connectionDB
         global cursorDB
-        connectionDB = cx_Oracle.connect('yerken/1@xe')
+        connectionDB = cx_Oracle.connect('colvir/main082018@cbsmain')
         cursorDB = connectionDB.cursor()
         print('Logon success')
     except cx_Oracle.DatabaseError as info:
         print('Logon  Error:', info)
 
 
-def mod_table_ol(idRow, nameCol, value):
+def mod_table_ol(idRow, nameCol, value, nameRow=None):
     text = 'select s2 from z_025_temp_ol where id=' + str(idRow)
     cursorDB.execute(text)
     text=None
     if nameCol=='s1':
         if not cursorDB.fetchone():
-            text = "insert into z_025_temp_ol (id," + nameCol + ") values(" + str(idRow) + ",:s)"
+            text = "insert into z_025_temp_ol (id," + nameCol + ",s4) values(" + str(idRow) + ",:s, ''" + nameRow + "'')"
     elif nameCol=='s2':
         if cursorDB.fetchone()[0] is None:
             text = "update z_025_temp_ol set " + nameCol + "=:s where id=" + str(idRow)
@@ -74,7 +74,8 @@ def liveTablePage():
 
 def betPage():
     # aHref=['42851758']
-    text = 'select id from z_025_temp_ol'
+    text = "select id from z_025_temp_ol where dbms_lob.substr(s1,10,1)>='" + dataToday + "'"
+    print(text)
     cursorDB.execute(text)
     # for ch in aHref:
     for ch in cursorDB.fetchall():
@@ -112,23 +113,22 @@ def livePage():
     # Список ставок
     for lTable in tree.xpath('//tr/td[@data-sport]'):
         DataSport = lTable.get('data-sport')
-        print(DataSport)
         NameSport = lTable.xpath('.//a/b')[0].text
-        print(NameSport)
         for lSport in lTable.xpath('//tr[@data-sport=\"' + DataSport + '\"]'):
             DataId = lSport.xpath('.//td/input/@value')[0]
-            print(DataId)
             cText = ''
             for lBet in lSport.xpath('.//text()'):
                 cRow = deleteSymbolUnless(lBet)
                 if len(cRow) > 0:
                     cText += cRow + ';'
             print(cText)
-        mod_table_ol(DataId, 's1', cText, NameSport)
+            mod_table_ol(DataId, 's1', cText, NameSport)
+
 
 connectDB()
-# time.sleep(100)
-livePage()
+time.sleep(100)
+#livePage()
+#liveTablePage()
 # print(time.ctime())
-betPage()
+#betPage()
 resultPage()
