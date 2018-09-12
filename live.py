@@ -59,7 +59,7 @@ def mod_table_ol(idRow, nameCol, value):
             print(text)
 
 
-def livePage():
+def liveTablePage():
     tree = connectURL('https://olimp.kz/index.php?page=table_live')
     # Список ставок
     for lTable in tree.xpath('//div[@class=\"lt-match\"]'):
@@ -107,6 +107,24 @@ def resultPage():
             except:
                 pass
 
+def livePage():
+    tree = connectURL('https://olimp.kz/betting')
+    # Список ставок
+    for lTable in tree.xpath('//tr/td[@data-sport]'):
+        DataSport = lTable.get('data-sport')
+        print(DataSport)
+        NameSport = lTable.xpath('.//a/b')[0].text
+        print(NameSport)
+        for lSport in lTable.xpath('//tr[@data-sport=\"' + DataSport + '\"]'):
+            DataId = lSport.xpath('.//td/input/@value')[0]
+            print(DataId)
+            cText = ''
+            for lBet in lSport.xpath('.//text()'):
+                cRow = deleteSymbolUnless(lBet)
+                if len(cRow) > 0:
+                    cText += cRow + ';'
+            print(cText)
+        mod_table_ol(DataId, 's1', cText, NameSport)
 
 connectDB()
 # time.sleep(100)
