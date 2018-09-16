@@ -1,5 +1,4 @@
-
-select count(*) from (
+select round(К_П2,1),count(*) from (
 select
 fToken2(П1,2,';') К_П1,
 fToken2(П2,2,';') К_П2,
@@ -42,9 +41,11 @@ id,s1,s2,s3,s4
 from
 (select id,
 dbms_lob.substr(s1) s1,
-dbms_lob.substr(s2) s2,
+dbms_lob.substr(s2,2500) s2,
 dbms_lob.substr(s3) s3,s4,
-2500 lenS2 
-from z_025_temp_ol where length(s2) between 1 and 2500 and s3 is not null and rownum<5000))
+2500 lenS2
+from z_025_temp_ol))
 )
-where К_П1<К_П2 and СЧЕТ_П1<СЧЕТ_П2
+where 
+((К_П1>К_П2 and СЧЕТ_П1<СЧЕТ_П2) or (К_П1<К_П2 and СЧЕТ_П1>СЧЕТ_П2))
+group by round(К_П2,1)
